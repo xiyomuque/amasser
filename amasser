@@ -3,9 +3,7 @@
 script_dir=$(dirname "$(readlink -f "$0")")
 
 function interactive() {
-  # Prompt the user for input
   read -e -n 1 -p 'What would you like to add? ("n" for note, "l" for link, "c" for clipboard content): ' userInput
-  # Check if user pressed Enter (empty input)
   if [[ -z "$userInput" ]]; then
     exit 0
   else
@@ -18,7 +16,6 @@ case "$1" in
   "")
     interactive
     ;;
-  # Add book with current page
   "n")
     read -p "Enter your note: " user_note
     if [[ -z $user_note ]]; then
