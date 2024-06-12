@@ -4,7 +4,7 @@ script_dir=$(dirname "$(readlink -f "$0")")
 check_link="$script_dir/check_link.py"
 
 function interactive() {
-  read -e -n 1 -p 'What would you like to add? ("n" for note, "l" for link, "c" for clipboard content): ' userInput
+  read -e -n 1 -p 'What would you like to add? ("n" for note, "c" for clipboard content): ' userInput
   if [[ -z "$userInput" ]]; then
     exit 0
   else
@@ -18,21 +18,31 @@ case "$1" in
     interactive
     ;;
   "n")
-    read -p "Enter your note: " user_note
+    filename="$script_dir/note.md"
+    nvim $filename
+    vim_pid=$!
+    wait $vim_pid
+    if [[ -f $filename ]]; then
+      user_note=$(cat $filename)
+      rm -f $filename
+    else
+      echo "Note not saved! Changes discarded."
+      exit 0
+    fi
     if [[ -z $user_note ]]; then
         echo "Your note is empty."
         exit 0
     fi
     hoarder bookmarks add --note "$user_note" > /dev/null
     ;;
-  "l")
-    read -p "Enter your link: " user_link
-    if [[ -z $user_link ]] || ! echo "$user_link" | $check_link; then
-        echo "Wrong link format."
-        exit 0
-    fi
-    hoarder bookmarks add --link "$user_link" > /dev/null
-    ;;
+  # "l")
+  #   read -p "Enter your link: " user_link
+  #   if [[ -z $user_link ]] || ! echo "$user_link" | $check_link; then
+  #       echo "Wrong link format."
+  #       exit 0
+  #   fi
+  #   hoarder bookmarks add --link "$user_link" > /dev/null
+  #   ;;
   "c")
     clipboard_contents=$(pbpaste)
     if [[ -z $clipboard_contents ]]; then
