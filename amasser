@@ -4,7 +4,7 @@ script_dir=$(dirname "$(readlink -f "$0")")
 check_link="$script_dir/check_link.py"
 
 function interactive() {
-  read -e -n 1 -p 'What would you like to add? ("n" for note, "c" for clipboard content): ' userInput
+  read -e -n 1 -p 'What would you like to add? ("n" for note, "e" to edit clipboard and then save, "p" for clipboard content): ' userInput
   if [[ -z "$userInput" ]]; then
     exit 0
   else
@@ -19,7 +19,7 @@ case "$1" in
     ;;
   "n")
     filename="$script_dir/note.md"
-    nvim $filename
+    nvim -c 'startinsert' $filename
     vim_pid=$!
     wait $vim_pid
     if [[ -f $filename ]]; then
@@ -43,7 +43,29 @@ case "$1" in
   #   fi
   #   hoarder bookmarks add --link "$user_link" > /dev/null
   #   ;;
-  "c")
+  "e")
+    filename="$script_dir/note.md"
+    nvim -c "0r!pbpaste" $filename
+    vim_pid=$!
+    wait $vim_pid
+    if [[ -f $filename ]]; then
+      user_note=$(cat $filename)
+      rm -f $filename
+    else
+      echo "Note not saved! Changes discarded."
+      exit 0
+    fi
+    if [[ -z $user_note ]]; then
+        echo "Your note is empty."
+        exit 0
+    fi
+    if echo "$user_note" | $check_link; then
+        hoarder bookmarks add --link "$user_note" > /dev/null
+    else
+        echo "$user_note" | hoarder bookmarks add --stdin > /dev/null
+    fi
+    ;;
+  "p")
     clipboard_contents=$(pbpaste)
     if [[ -z $clipboard_contents ]]; then
         echo "Your clipboard is empty."
