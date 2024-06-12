@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 script_dir=$(dirname "$(readlink -f "$0")")
+check_link="$script_dir/check_link.py"
 
 function interactive() {
   read -e -n 1 -p 'What would you like to add? ("n" for note, "l" for link, "c" for clipboard content): ' userInput
@@ -25,13 +26,19 @@ case "$1" in
     ;;
   "l")
     read -p "Enter your link: " user_link
-    if [[ -z $user_link ]]; then
+    if [[ -z $user_link ]] || ! echo "$user_link" | $check_link; then
+        echo "Wrong link format."
         exit 0
     fi
     hoarder bookmarks add --link "$user_link" > /dev/null
     ;;
   "c")
-    pbpaste | hoarder bookmarks add --stdin > /dev/null
+    clipboard_contents=$(pbpaste)
+    if echo "$clipboard_contents" | $check_link; then
+        hoarder bookmarks add --link "$clipboard_contents" > /dev/null
+    else
+        $clipboard_contennts | hoarder bookmarks add --stdin > /dev/null
+    fi
     ;;
   *)
     exit 0
