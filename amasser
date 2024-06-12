@@ -42,7 +42,7 @@ case "$1" in
     if echo "$clipboard_contents" | $check_link; then
         hoarder bookmarks add --link "$clipboard_contents" > /dev/null
     else
-        $clipboard_contennts | hoarder bookmarks add --stdin > /dev/null
+        echo "$clipboard_contents" | hoarder bookmarks add --stdin > /dev/null
     fi
     ;;
   *)
