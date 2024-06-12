@@ -20,6 +20,7 @@ case "$1" in
   "n")
     read -p "Enter your note: " user_note
     if [[ -z $user_note ]]; then
+        echo "Your note is empty."
         exit 0
     fi
     hoarder bookmarks add --note "$user_note" > /dev/null
@@ -34,6 +35,10 @@ case "$1" in
     ;;
   "c")
     clipboard_contents=$(pbpaste)
+    if [[ -z $clipboard_contents ]]; then
+        echo "Your clipboard is empty."
+        exit 0
+    fi
     if echo "$clipboard_contents" | $check_link; then
         hoarder bookmarks add --link "$clipboard_contents" > /dev/null
     else
