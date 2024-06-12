@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+script_dir=$(dirname "$(readlink -f "$0")")
+
+function interactive() {
+  # Prompt the user for input
+  read -e -n 1 -p 'What would you like to add? ("n" for note, "l" for link, "c" for clipboard content): ' userInput
+  # Check if user pressed Enter (empty input)
+  if [[ -z "$userInput" ]]; then
+    exit 0
+  else
+    "$0" "$userInput"
+    exit 0
+  fi
+}
+
+case "$1" in
+  "")
+    interactive
+    ;;
+  # Add book with current page
+  "n")
+    read -p "Enter your note: " user_note
+    if [[ -z $user_note ]]; then
+        exit 0
+    fi
+    hoarder bookmarks add --note "$user_note" > /dev/null
+    ;;
+  "l")
+    read -p "Enter your link: " user_link
+    if [[ -z $user_link ]]; then
+        exit 0
+    fi
+    hoarder bookmarks add --link "$user_link" > /dev/null
+    ;;
+  "c")
+    pbpaste | hoarder bookmarks add --stdin > /dev/null
+    ;;
+  *)
+    exit 0
+    ;;
+esac
