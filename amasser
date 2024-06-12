@@ -4,7 +4,7 @@ script_dir=$(dirname "$(readlink -f "$0")")
 check_link="$script_dir/check_link.py"
 
 function interactive() {
-  read -e -n 1 -p 'What would you like to add? ("n" for note, "e" to edit clipboard and then save, "p" for clipboard content): ' userInput
+  read -e -n 1 -p 'What would you like to add? ("n" for note, "e" to edit clipboard, "p" for clipboard content): ' userInput
   if [[ -z "$userInput" ]]; then
     exit 0
   else
@@ -45,7 +45,7 @@ case "$1" in
   #   ;;
   "e")
     filename="$script_dir/note.md"
-    nvim -c "0r!pbpaste" $filename
+    nvim -c "r!pbpaste" $filename
     vim_pid=$!
     wait $vim_pid
     if [[ -f $filename ]]; then
